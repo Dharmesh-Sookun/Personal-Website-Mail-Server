@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const rateLimit = require('express-rate-limit');
 
 require('dotenv').config();
 
@@ -28,10 +29,18 @@ transporter.verify((error, success) => {
   else console.log(success);
 });
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(helmet());
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(morgan('common'));
+app.use(limiter);
 
 app.get('/', (req, res) => {
   res.json({
